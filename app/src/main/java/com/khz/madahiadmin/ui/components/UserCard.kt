@@ -50,6 +50,14 @@ fun UserCard(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.secondary
                 )
+                Text(
+                    "تعداد شعرها: ${user.poemCount}",
+                    style = MaterialTheme.typography.bodySmall
+                )
+                Text(
+                    "تعداد دسته‌بندی‌ها: ${user.categoryCount}",
+                    style = MaterialTheme.typography.bodySmall
+                )
                 if (!user.email.isNullOrBlank()) Text(
                     "ایمیل: ${user.email}",
                     style = MaterialTheme.typography.bodySmall

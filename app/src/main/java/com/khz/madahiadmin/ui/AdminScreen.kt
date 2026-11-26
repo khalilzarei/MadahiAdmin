@@ -93,6 +93,11 @@ private fun UsersContent(
     state: AdminUiState,
     viewModel: AdminViewModel
 ) {
+    Button(
+        onClick = viewModel::logout,
+        enabled = !state.isLoading
+    ) { Text("خروج از حساب") }
+
     OutlinedTextField(
         value = state.searchText,
         onValueChange = viewModel::onSearchChanged,

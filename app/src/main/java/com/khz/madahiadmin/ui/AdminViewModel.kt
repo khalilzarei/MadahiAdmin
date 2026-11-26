@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.khz.madahiadmin.data.model.AdminUiState
 import com.khz.madahiadmin.data.model.AdminUser
-import com.khz.madahiadmin.data.remote.AdminApi
 import com.khz.madahiadmin.data.repository.AdminRepository
 import com.khz.madahiadmin.data.session.AdminSessionStore
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,6 +31,11 @@ class AdminViewModel(
 
     fun onMobileChanged(value: String) = _state.update { it.copy(mobile = value) }
     fun onSearchChanged(value: String) = _state.update { it.copy(searchText = value) }
+
+    fun logout() {
+        sessionStore.clear()
+        _state.value = AdminUiState()
+    }
 
     fun login() {
         val current = _state.value
@@ -113,29 +117,29 @@ class AdminViewModel(
                     search
                 )
             }.onSuccess { response ->
-                    if (response.error) {
-                        _state.update {
-                            it.copy(
-                                isLoading = false,
-                                errorMessage = response.errorMessage
-                                        ?: "دریافت کاربران ناموفق بود"
-                            )
-                        }
-                    } else {
-                        _state.update {
-                            it.copy(
-                                users = response.users.orEmpty(),
-                                page = response.page,
-                                totalPages = response.totalPages.coerceAtLeast(1),
-                                totalUsers = response.totalUsers,
-                                totalResults = response.totalResults,
-                                appliedSearch = search,
-                                isLoading = false,
-                                errorMessage = null
-                            )
-                        }
+                if (response.error) {
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = response.errorMessage
+                                    ?: "دریافت کاربران ناموفق بود"
+                        )
+                    }
+                } else {
+                    _state.update {
+                        it.copy(
+                            users = response.users.orEmpty(),
+                            page = response.page,
+                            totalPages = response.totalPages.coerceAtLeast(1),
+                            totalUsers = response.totalUsers,
+                            totalResults = response.totalResults,
+                            appliedSearch = search,
+                            isLoading = false,
+                            errorMessage = null
+                        )
                     }
                 }
+            }
                 .onFailure { error ->
                     _state.update {
                         it.copy(
@@ -174,19 +178,19 @@ class AdminViewModel(
                     enabled
                 )
             }.onFailure { error ->
-                    updateUser(user.id) {
-                        it.copy(
-                            isPremium = user.isPremium,
-                            premiumSource = user.premiumSource
-                        )
-                    }
-                    _state.update {
-                        it.copy(
-                            errorMessage = error.message
-                                    ?: "ذخیره وضعیت ناموفق بود"
-                        )
-                    }
+                updateUser(user.id) {
+                    it.copy(
+                        isPremium = user.isPremium,
+                        premiumSource = user.premiumSource
+                    )
                 }
+                _state.update {
+                    it.copy(
+                        errorMessage = error.message
+                                ?: "ذخیره وضعیت ناموفق بود"
+                    )
+                }
+            }
             _state.update { it.copy(isLoading = false) }
         }
     }

@@ -7,15 +7,45 @@ import retrofit2.HttpException
 
 class AdminRepository(private val api: AdminApi) {
     suspend fun login(mobile: String): Result<String> {
-        val response = api.login(mobile)
-        return if (response.error || response.token.isNullOrBlank()) {
+        return try {
+            val response = api.login(mobile)
+            if (response.error || response.token.isNullOrBlank()) {
+                Result.failure(
+                    IllegalStateException(
+                        response.errorMessage
+                                ?: "ورود ناموفق بود"
+                    )
+                )
+            } else {
+                Result.success(response.token)
+            }
+        } catch (e: HttpException) {
+            val body = e.response()
+                ?.errorBody()
+                ?.string()
+            val message = runCatching {
+                JSONObject(
+                    body
+                            ?: "{}"
+                ).optString("error_msg")
+            }.getOrNull()
+                ?.takeIf(String::isNotBlank)
+                    ?: "خطا در ارتباط با سرور (HTTP ${e.code()})"
             Result.failure(
                 IllegalStateException(
-                    response.errorMessage
-                            ?: "ورود ناموفق بود"
+                    message,
+                    e
                 )
             )
-        } else Result.success(response.token)
+        } catch (e: Exception) {
+            Result.failure(
+                IllegalStateException(
+                    e.message
+                            ?: "خطا در ارتباط با سرور",
+                    e
+                )
+            )
+        }
     }
 
     suspend fun getUsers(

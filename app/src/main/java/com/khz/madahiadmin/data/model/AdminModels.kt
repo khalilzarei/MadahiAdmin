@@ -28,7 +28,9 @@ data class AdminUser(
     @SerializedName("premium_source") val premiumSource: String?,
     @SerializedName("premium_at") val premiumAt: String?,
     @SerializedName("create_at") val createdAt: String?,
-    @SerializedName("update_at") val updatedAt: String?
+    @SerializedName("update_at") val updatedAt: String?,
+    @SerializedName("poem_count") val poemCount: Int = 0,
+    @SerializedName("category_count") val categoryCount: Int = 0
 )
 
 data class UpdateResponse(
